@@ -30,7 +30,7 @@ pipeline {
             steps {
                 script {
                     // Dynamic environment setup based on branch name
-                    ENVIRONMENT = BRANCH_NAME == 'development' ? 'Demo' :
+                    ENVIRONMENT = BRANCH_NAME == 'main' ? 'Demo' :
                                   BRANCH_NAME == 'staging' ? 'Staging' :
                                   BRANCH_NAME == 'production' ? 'Production' :
                                   BRANCH_NAME.startsWith('test') ? 'Testing' : 'Unknown'
