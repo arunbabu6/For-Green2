@@ -45,7 +45,6 @@ pipeline {
         }
 
         stage('Analyze and Scan') {
-            agent any // This stage does not require a specific Docker image
             steps {
                 unstash 'build-artifacts'
                 dir('client') {
@@ -66,6 +65,7 @@ pipeline {
                     echo "Running analysis and security scans"
                 }
             }
+        }
         }
 
         stage('Build and Push Docker Image') {
@@ -130,4 +130,3 @@ pipeline {
         }
     }
 }
-
