@@ -113,7 +113,7 @@ pipeline {
 
         stage('Snyk Security Scan') {
                      steps {
-                            snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'Snyk', targetFile: 'client/package.json'
+                            snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '/client/package.json'
                          }
             }
                // snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'Fork-group2-global-green-init', snykInstallation: 'Snyk', snykTokenId: 'Snyk-Token-ID', targetFile: 'Fork-group2-global-green-init/client/package.json'
