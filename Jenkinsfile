@@ -122,11 +122,13 @@ pipeline {
                 }
             }
         }
-    }
+}
 
     post {
         always {
             echo "Pipeline execution completed for ${ENVIRONMENT}"
         }
     }
-}
+
+
+
