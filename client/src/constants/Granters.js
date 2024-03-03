@@ -1,0 +1,88 @@
+const granterData = [
+  {
+    id: 1,
+    img: "img1",
+    name: "Teto",
+    Description: "This is Teto grant, we can create access for everyone",
+    Rate: "$1000",
+  },
+  {
+    id: 2,
+    img: "img1",
+    name: "Aria",
+    Description: "This is Teto grant, we can create access for everyone",
+    Rate: "$1500",
+  },
+  {
+    id: 3,
+    img: "img1",
+    name: "Leo",
+    Description: "Leo's grant description ",
+    Rate: "$1200",
+  },
+  {
+    id: 4,
+    img: "img1",
+    name: "Teto",
+    Description: "This is Teto grant , we can create access for everyone",
+    Rate: "$1000",
+  },
+  {
+    id: 5,
+    img: "img1",
+    name: "Aria",
+    Description: "Aria's grant description",
+    Rate: "$1500",
+  },
+  {
+    id: 6,
+    img: "img1",
+    name: "Leo",
+    Description: "Leo's grant description , we can create access for everyone",
+    Rate: "$1200",
+  },
+  {
+    id: 7,
+    img: "img1",
+    name: "Teto",
+    Description: "This is Teto grant , we can create access for everyone",
+    Rate: "$1000",
+  },
+  {
+    id: 8,
+    img: "img1",
+    name: "Aria",
+    Description: "Aria's grant description",
+    Rate: "$1500",
+  },
+  {
+    id: 9,
+    img: "img1",
+    name: "Leo",
+    Description: "Leo's grant description , we can create access for everyone",
+    Rate: "$1200",
+  },
+  {
+    id: 10,
+    img: "img1",
+    name: "Teto",
+    Description: "This is Teto grant , we can create access for everyone",
+    Rate: "$1000",
+  },
+  {
+    id: 11,
+    img: "img1",
+    name: "Aria",
+    Description: "Aria's grant description",
+    Rate: "$1500",
+  },
+  {
+    id: 12,
+    img: "img1",
+    name: "Leo",
+    Description: "Leo's grant description , we can create access for everyone",
+    Rate: "$1200",
+  },
+];
+
+export default granterData;
