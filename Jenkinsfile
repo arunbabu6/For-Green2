@@ -10,6 +10,7 @@ pipeline {
         TEST_SSH_CREDENTIALS = credentials('test-ssh-credentials-id')
         STAGE_SSH_CREDENTIALS = credentials('stage-ssh-credentials-id')
         PROD_SSH_CREDENTIALS = credentials('prod-ssh-credentials-id')
+        
         // Docker Hosts setup
         DEMO_DOCKER_HOST = 'ssh://host.docker.internal'
         TEST_DOCKER_HOST = 'ssh://test-user@test-docker-host'
