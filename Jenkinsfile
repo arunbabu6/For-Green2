@@ -123,12 +123,14 @@ pipeline {
     }
 
     post {
-        always {
+    always {
+        script {
             if (env.ENVIRONMENT) {
                 echo "Pipeline execution completed for ${env.ENVIRONMENT}"
             } else {
                 echo "Pipeline execution completed, but ENVIRONMENT was not set."
             }
         }
+    }
     }
 }
