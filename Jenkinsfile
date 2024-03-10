@@ -7,7 +7,6 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('Dockerhub')
         // SSH credentials for each environment
         DEMO_SSH_CREDENTIALS = credentials('ssh-wsl')
-        //SSH_DOCKERHOST = credentials('jenkinaccess')
         TEST_SSH_CREDENTIALS = credentials('test-ssh-credentials-id')
         STAGE_SSH_CREDENTIALS = credentials('stage-ssh-credentials-id')
         PROD_SSH_CREDENTIALS = credentials('prod-ssh-credentials-id')
@@ -44,13 +43,11 @@ pipeline {
             agent any
             steps {
                  script {
-                  // Check if the current workspace directory exists
                     if (fileExists('.')) {
-                    // If it exists, delete the workspace directory and its contents
-                         deleteDir()
+                        deleteDir()
                     } else {
-                         echo "Workspace directory does not exist, no need to delete."
-                         }
+                        echo "Workspace directory does not exist, no need to delete."
+                    }
                  }
              }
         }
@@ -68,48 +65,28 @@ pipeline {
         }
 
         stage('Stash Client') {
+            agent any
             steps {
-
-                stash includes: 'dir(\'client\')\\**', name: 'client-dir'
-            }
-        }
-        
-
-        stage('Prepare and Build') {
-            steps {
-                script {
-                    // Assuming DEMO_DOCKER_HOST is in the format ssh://user@host
-                    def sshHost = DEMO_DOCKER_HOST.replace('ssh://', '') // Removes ssh://
-                    // Using SSH to clean up and prepare build directory on the host machine
-                    sshagent(['jenkinaccess']) {
-                        // Clean up the project directory on the host machine
-                        sh "ssh -o StrictHostKeyChecking=no ${sshHost} 'rm -rf ${PROJECT_DIR}/*'"
-
-                        // Copy the 'client' directory to the project directory on the host machine
-                        // Note: Adjust /path/to/client if your client directory's path is different in Jenkins workspace
-                        sh "scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/client ${sshHost}:${PROJECT_DIR}"
-                        // Execute build commands on the host machine
-                        sh "ssh -o StrictHostKeyChecking=no ${sshHost} 'cd ${PROJECT_DIR} && npm install && npm run build'"
-                    }
+                dir('client') {
+                    stash includes: '**', name: 'client-src'
                 }
             }
         }
 
-      //  stage('Prepare and Build') {
-      //      agent {
-      //          docker {
-      //              image 'node:21'
-      //          }
-      //      }
-
-        //    steps {
-        //        dir('client') {
-        //            sh 'npm install'
-        //            sh 'npm run build'
-        //            stash includes: '**', name: 'build-artifacts'
-        //        }
-        //    }
-       // }
+        stage('Prepare and Build') {
+            agent any
+            steps {
+                script {
+                    unstash 'client-src'
+                    dir('client') {
+                        // Assuming the build commands are here
+                        sh 'npm install'
+                        sh 'npm run build'
+                        stash includes: '**', name: 'build-artifacts'
+                    }
+                }
+            }
+        }
 
         stage('Analyze and Scan') {
             agent any
@@ -117,10 +94,11 @@ pipeline {
                 script {
                     unstash 'build-artifacts'
                     dir('client') {
+                        // Your SonarQube scan
                         withSonarQubeEnv('Sonarcube-cred') {
                             sh "sonar-scanner -Dsonar.projectKey=my-project -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.globalgreeninit.world -Dsonar.login=${env.SONARQUBE_TOKEN}"
                         }
-                        snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: 'package.json'
+                        snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '/client/package.json'
                     }
                 }
             }
@@ -131,9 +109,12 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'Dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        // Logging into Docker
                         sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                        def appImage = docker.build("${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}")
-                        appImage.push()
+                        // Building the Docker image, tag it accordingly
+                        sh "docker build -t ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} ."
+                        // Pushing the Docker image to DockerHub
+                        sh "docker push ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
                     }
                 }
             }
