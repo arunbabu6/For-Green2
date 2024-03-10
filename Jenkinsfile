@@ -102,33 +102,48 @@ pipeline {
         }
 
         stage('Deploy') {
-            agent any
             steps {
                 script {
-                    def sshCredentialsId = ENVIRONMENT == 'Production' ? 'prod-ssh-credentials-id' :
-                                           ENVIRONMENT == 'Staging' ? 'stage-ssh-credentials-id' :
-                                           ENVIRONMENT == 'Testing' ? 'test-ssh-credentials-id' :
-                                           'ssh-wsl' // Default to Demo credentials
+                    def dockerHost = ''
+                    def sshCredentialsId = ''
+                    switch (ENVIRONMENT) {
+                        case 'Demo':
+                            dockerHost = DEMO_DOCKER_HOST
+                            sshCredentialsId = DEMO_SSH_CREDENTIALS
+                            break
+                    //Commented out until these environments for now
+                        //case 'Staging':
+                            //dockerHost = STAGE_DOCKER_HOST
+                            //sshCredentialsId = STAGE_SSH_CREDENTIALS
+                           // break
+                        //case 'Production':
+                          //  dockerHost = PROD_DOCKER_HOST
+                          //  sshCredentialsId = PROD_SSH_CREDENTIALS
+                          //  break
+                        //case 'Testing':
+                          //  dockerHost = TEST_DOCKER_HOST
+                          //  sshCredentialsId = TEST_SSH_CREDENTIALS
+                          //  break
+                    }
 
-                    def dockerHost = ENVIRONMENT == 'Production' ? 'prod-user@prod-docker-host' :
-                                      ENVIRONMENT == 'Staging' ? 'stage-user@stage-docker-host' :
-                                      ENVIRONMENT == 'Testing' ? 'test-user@test-docker-host' :
-                                      'host.docker.internal' // Default to Demo host
-
-                    if (sshCredentialsId && dockerHost) {
+                    if (dockerHost.startsWith('ssh://')) {
                         sshagent([sshCredentialsId]) {
-                            def dockerImage = "${DOCKER_IMAGE}:${BRANCH_NAME}-${env.BUILD_NUMBER}"
                             sh """
-                               ssh -o StrictHostKeyChecking=no ${dockerHost} 'docker pull ${dockerImage} && docker stop ${BRANCH_NAME}-app || true && docker rm ${BRANCH_NAME}-app || true && docker run -d --name ${BRANCH_NAME}-app -p 80:3000 ${dockerImage}'
+                                ssh -o StrictHostKeyChecking=no ${dockerHost} <<EOF
+                                    docker pull ${DOCKER_IMAGE}:${ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    docker stop ${ENVIRONMENT.toLowerCase()}-app || true
+                                    docker rm ${ENVIRONMENT.toLowerCase()}-app || true
+                                    docker run -d --name ${ENVIRONMENT.toLowerCase()}-app -p 80:3000 ${DOCKER_IMAGE}:${ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                EOF
                             """
                         }
                     } else {
-                        echo "Deployment environment not configured properly."
+                        echo "Local deployment logic not specified"
                     }
                 }
             }
         }
-}
+    }
 
     post {
         always {
