@@ -151,7 +151,7 @@ pipeline {
                 script {
                     switch (ENVIRONMENT) {
                         case 'Demo':
-                            sshagent(['dockerhub1']) {
+                            sshagent(['jenkinaccess']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no host.docker.internal '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
@@ -163,7 +163,7 @@ pipeline {
                             break
                             }
                         case 'Testing':
-                            sshagent(['dockerhub1']) {
+                            sshagent(['jenkinaccess']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no Testing-host.docker.internal '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
@@ -175,7 +175,7 @@ pipeline {
                             break
                             }
                         case 'Staging':
-                            sshagent(['dockerhub1']) {
+                            sshagent(['jenkinaccess']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no Staging-host.docker.internal '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
@@ -187,7 +187,7 @@ pipeline {
                             break
                             }
                         case 'Production':
-                            sshagent(['dockerhub1']) {
+                            sshagent(['jenkinaccess']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no Production-host.docker.internal '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
