@@ -69,11 +69,11 @@ pipeline {
 
         stage('Stash Client') {
             steps {
-                dir('client') {
-                    stash includes: '**', name: 'client-src'
-                    }
-                }
+
+                stash includes: 'dir(\'client\')\\**', name: 'client-dir'
+            }
         }
+        
 
         stage('Prepare and Build') {
             steps {
