@@ -39,6 +39,7 @@ pipeline {
         }
 
         stage('Clean Workspace') {
+            agent any
             steps {
                  script {
                   // Check if the current workspace directory exists
