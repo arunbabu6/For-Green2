@@ -57,7 +57,11 @@ pipeline {
             steps {
                 script {
                     if (currentBuild.previousBuild != null && currentBuild.previousBuild.result == 'SUCCESS') {
-                        copyArtifacts(projectName: "${JOB_NAME}", selector: lastSuccessful(), filter: 'lint-results.txt');
+                        try { 
+                            copyArtifacts(projectName: "green2/main", selector: lastSuccessful(), filter: 'lint-results.txt');
+                        } catch (Exception e) {
+                            echo "Warning: Failed to copy artifacts. Proceeding without them."
+                        }
                     } else {
                         echo "No previous successful build found. Skipping artifact copy."
                     }
