@@ -23,7 +23,7 @@ pipeline {
             steps {
                 script {
                     ENVIRONMENT = BRANCH_NAME == 'main' ? 'Demo' :
-                                  BRANCH_NAME == 'production' ? 'Production'
+                                  BRANCH_NAME == 'production' ? 'Production' :
                                   BRANCH_NAME == 'staging' ? 'Staging' :
                                   BRANCH_NAME.startsWith('test') ? 'Testing' : 'De'
                     echo "Environment set to ${ENVIRONMENT}"
@@ -137,3 +137,4 @@ pipeline {
             echo "Pipeline execution completed for ${ENVIRONMENT}"
         }
     }
+
