@@ -6,12 +6,12 @@ pipeline {
         SONARQUBE_TOKEN = credentials('sonar-docker')
         DOCKERHUB_CREDENTIALS = credentials('Dockerhub')
         // SSH credentials for each environment
-        DEMO_SSH_CREDENTIALS = credentials('ssh-wsl') 
+        DEMO_SSH_CREDENTIALS = credentials('ssh-wsl')
         TEST_SSH_CREDENTIALS = credentials('test-ssh-credentials-id')
         STAGE_SSH_CREDENTIALS = credentials('stage-ssh-credentials-id')
         PROD_SSH_CREDENTIALS = credentials('prod-ssh-credentials-id')
         // Docker Hosts setup
-        DEMO_DOCKER_HOST = 'ssh://host.docker.internal' 
+        DEMO_DOCKER_HOST = 'ssh://host.docker.internal'
         TEST_DOCKER_HOST = 'ssh://test-user@test-docker-host'
         STAGE_DOCKER_HOST = 'ssh://stage-user@stage-docker-host'
         PROD_DOCKER_HOST = 'ssh://prod-user@prod-docker-host'
@@ -22,11 +22,11 @@ pipeline {
             agent any
             steps {
                 script {
-                    ENVIRONMENT = BRANCH_NAME == 'main' ? 'Demo' :
+                    env.ENVIRONMENT = BRANCH_NAME == 'main' ? 'Demo' :
                                   BRANCH_NAME == 'production' ? 'Production' :
                                   BRANCH_NAME == 'staging' ? 'Staging' :
-                                  BRANCH_NAME.startsWith('test') ? 'Testing' : 'De'
-                    echo "Environment set to ${ENVIRONMENT}"
+                                  BRANCH_NAME.startsWith('test') ? 'Testing' : 'Development'
+                    echo "Environment set to ${env.ENVIRONMENT}"
                 }
             }
         }
@@ -37,11 +37,13 @@ pipeline {
                 checkout scm
             }
         }
+
         stage('Clean Workspace') {
             steps {
                 deleteDir()
             }
         }
+
         stage('Use Artifacts') {
             steps {
                 script {
@@ -50,20 +52,19 @@ pipeline {
                     } else {
                         echo "No previous successful build found. Skipping artifact copy."
                     }
-                }                        
-                // Use lint-results.txt as needed
+                }
             }
         }
+
         stage('Prepare and Build') {
-            agent { 
-                docker { 
-                    image 'node:21' 
-                    } 
+            agent {
+                docker {
+                    image 'node:21'
                 }
+            }
 
             steps {
                 dir('client') {
-                    sh 'rm -rf node_modules/'
                     sh 'npm install'
                     sh 'npm run build'
                     stash includes: '**', name: 'build-artifacts'
@@ -80,66 +81,41 @@ pipeline {
                         withSonarQubeEnv('Sonarcube-cred') {
                             sh "sonar-scanner -Dsonar.projectKey=my-project -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.globalgreeninit.world -Dsonar.login=${env.SONARQUBE_TOKEN}"
                         }
-                        // Snyk scan (corrected placement and syntax)
-                        //withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
-                            snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '/client/package.json'
+                        snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: 'package.json'
                     }
                 }
             }
         }
-        
 
         stage('Build and Push Docker Image') {
+            agent any
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'Dockerhub', variable: 'Dockerhub')]) {
-                    sh 'docker login -u arunthopil' -p $Dockerhub
+                    withCredentials([usernamePassword(credentialsId: 'Dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                        def appImage = docker.build("${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}")
+                        appImage.push()
                     }
-                    def appImage = docker.build('${DOCKER_IMAGE}:${ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}')
-                    appImage.push()
                 }
             }
         }
-
 
         stage('Deploy') {
             steps {
                 script {
-                    def dockerHost = ''
-                    def sshCredentialsId = ''
-                    switch (ENVIRONMENT) {
-                        case 'Demo':
-                            dockerHost = DEMO_DOCKER_HOST
-                            sshCredentialsId = DEMO_SSH_CREDENTIALS
-                            break
-                    //Commented out until these environments for now
-                        //case 'Staging':
-                            //dockerHost = STAGE_DOCKER_HOST
-                            //sshCredentialsId = STAGE_SSH_CREDENTIALS
-                           // break
-                        //case 'Production':
-                          //  dockerHost = PROD_DOCKER_HOST
-                          //  sshCredentialsId = PROD_SSH_CREDENTIALS
-                          //  break
-                        //case 'Testing':
-                          //  dockerHost = TEST_DOCKER_HOST
-                          //  sshCredentialsId = TEST_SSH_CREDENTIALS
-                          //  break
-                    }
-
-                    if (dockerHost.startsWith('ssh://')) {
-                        sshagent([sshCredentialsId]) {
+                    if (env.DEMO_DOCKER_HOST && env.DEMO_SSH_CREDENTIALS) {
+                        sshagent([env.DEMO_SSH_CREDENTIALS]) {
                             sh """
-                                ssh -o StrictHostKeyChecking=no ${dockerHost} <<EOF
-                                    docker pull ${DOCKER_IMAGE}:${ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
-                                    docker stop ${ENVIRONMENT.toLowerCase()}-app || true
-                                    docker rm ${ENVIRONMENT.toLowerCase()}-app || true
-                                    docker run -d --name ${ENVIRONMENT.toLowerCase()}-app -p 80:3000 ${DOCKER_IMAGE}:${ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                ssh -o StrictHostKeyChecking=no ${env.DEMO_DOCKER_HOST} <<EOF
+                                    docker pull ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    docker stop ${env.ENVIRONMENT.toLowerCase()}-app || true
+                                    docker rm ${env.ENVIRONMENT.toLowerCase()}-app || true
+                                    docker run -d --name ${env.ENVIRONMENT.toLowerCase()}-app -p 80:3000 ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                 EOF
                             """
                         }
                     } else {
-                        echo "Local deployment logic not specified"
+                        echo "Deployment configuration not found for ${env.ENVIRONMENT}"
                     }
                 }
             }
@@ -148,7 +124,11 @@ pipeline {
 
     post {
         always {
-            echo "Pipeline execution completed for ${ENVIRONMENT}"
+            if (env.ENVIRONMENT) {
+                echo "Pipeline execution completed for ${env.ENVIRONMENT}"
+            } else {
+                echo "Pipeline execution completed, but ENVIRONMENT was not set."
+            }
         }
     }
 }
