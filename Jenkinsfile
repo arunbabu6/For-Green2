@@ -116,6 +116,31 @@ pipeline {
             }
         }
 
+        stage('Lint') {
+            steps {
+                dir('client') { // Ensure we're inside the 'client' directory where package.json is located
+                                // Execute the lint script and allow the build to fail on lint errors
+                  script {
+                     // Run lint script and capture the exit code
+                     def lintExitCode = sh(script: 'npm run lint:ci || true', returnStatus: true)
+
+                     // Check if the lint report exists
+                      if (fileExists('eslint-report.json')) {
+                     // Archive the eslint report
+                          archiveArtifacts artifacts: 'eslint-report.json', onlyIfSuccessful: true
+                    } else {
+                          echo "No eslint-report.json found"
+                    }
+
+                // If the lint script exited with an error (non-zero exit code), fail the build
+                      if (lintExitCode != 0) {
+                           error("Linting failed with exit code: ${lintExitCode}")
+                     }
+                   }
+               }
+           }
+        }
+
         stage('Build and Push Docker Image') {
             agent any
             steps {
