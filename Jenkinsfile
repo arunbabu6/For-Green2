@@ -39,7 +39,17 @@ pipeline {
                 checkout scm
             }
         }
-
+        stage('Debug SSH') {
+            steps {
+                script {
+                    sshagent([SSH_DOCKERHOST]) {
+                        sh 'env' // Print environment variables for debugging
+                        sh "ssh -o StrictHostKeyChecking=no ${sshHost} 'echo SSH connection successful'"
+                        }
+                    }
+                }
+        }
+        
         stage('Clean Workspace') {
             agent any
             steps {
