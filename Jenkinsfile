@@ -90,15 +90,13 @@ pipeline {
         }
 
         stage('Build and Push Docker Image') {
-            agent any
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'Dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        def dockerImage = "${DOCKER_IMAGE}:${BRANCH_NAME}-${env.BUILD_NUMBER}"
-                        sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
-                        sh "docker build -t ${dockerImage} ."
-                        sh "docker push ${dockerImage}"
+                    withCredentials([string(credentialsId: 'Dockerhub', variable: 'Dockerhub')]) {
+                    sh 'docker login -u arunthopil' -p $Dockerhub
                     }
+                    def appImage = docker.build('${DOCKER_IMAGE}:${ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}')
+                    appImage.push()
                 }
             }
         }
