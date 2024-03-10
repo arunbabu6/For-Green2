@@ -53,6 +53,7 @@ pipeline {
         }
 
         stage('Use Artifacts') {
+            agent any
             steps {
                 script {
                     if (currentBuild.previousBuild != null && currentBuild.previousBuild.result == 'SUCCESS') {
