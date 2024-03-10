@@ -90,11 +90,12 @@ pipeline {
 
         // SonarQube Analysis and Snyk Security Scan 
         stage('SonarQube Analysis') {
+            agent any
             steps {
-                withSonarQubeEnv('sonar-docker') { // 'Sonarcube-cred' from |should match the SonarQube configuration in Jenkins
+                withSonarQubeEnv('Sonarqube') { // 'Sonarcube-cred' from |should match the SonarQube configuration in Jenkins
                     sh """
                       sonar-scanner \
-                      -Dsonar.projectKey=my-project \
+                      -Dsonar.projectKey=Project-Green2 \
                       -Dsonar.sources=. \
                       -Dsonar.host.url=http://localhost:9009/ \
                       -Dsonar.login=$SONARQUBE_TOKEN
@@ -104,10 +105,11 @@ pipeline {
         }
 
         stage('Snyk Security Scan') {
-                     steps {
-                            snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '/client/package.json'
-                         }
-            }
+            agent any
+            steps {
+                snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '/client/package.json'
+                }
+        }
 
         stage('Build and Push Docker Image') {
             agent any
@@ -145,7 +147,6 @@ pipeline {
                 }
             }
         }
-        
     }
 
     post {
