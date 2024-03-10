@@ -6,15 +6,6 @@ pipeline {
         SONARQUBE_TOKEN = credentials('sonar-docker')
         DOCKERHUB_CREDENTIALS = credentials('dockerhub1')
         // SSH credentials for each environment
-        DEMO_SSH_CREDENTIALS = credentials('ssh-wsl')
-        TEST_SSH_CREDENTIALS = credentials('test-ssh-credentials-id')
-        STAGE_SSH_CREDENTIALS = credentials('stage-ssh-credentials-id')
-        PROD_SSH_CREDENTIALS = credentials('prod-ssh-credentials-id')
-        // Docker Hosts setup
-        DEMO_DOCKER_HOST = 'ssh://host.docker.internal'
-        TEST_DOCKER_HOST = 'ssh://test-user@test-docker-host'
-        STAGE_DOCKER_HOST = 'ssh://stage-user@stage-docker-host'
-        PROD_DOCKER_HOST = 'ssh://prod-user@prod-docker-host'
         PROJECT_DIR = '/opt/docker-green'
     }
 
@@ -124,18 +115,18 @@ pipeline {
         stage('Lint') {
             agent any
             steps {
-                dir('client') { // Ensure we're inside the 'client' directory where package.json is located
+                dir('client') { 
                                 // Execute the lint script and allow the build to fail on lint errors
                   script {
                      // Run lint script and capture the exit code
                      def lintExitCode = sh(script: 'npm run lint:ci || true', returnStatus: true)
 
                      // Check if the lint report exists
-                      if (fileExists('eslint-report.json')) {
+                      if (fileExists('eslint-report.xml')) {
                      // Archive the eslint report
                           archiveArtifacts artifacts: 'eslint-report.json', onlyIfSuccessful: true
                     } else {
-                          echo "No eslint-report.json found"
+                          echo "No eslint-report.xml found"
                     }
 
                 // If the lint script exited with an error (non-zero exit code), fail the build
