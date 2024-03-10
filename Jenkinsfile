@@ -95,7 +95,7 @@ pipeline {
                     unstash 'build-artifacts'
                     dir('client') {
                         // Your SonarQube scan
-                        withSonarQubeEnv('Sonarcube-cred') {
+                        withSonarQubeEnv('sonar-docker') {
                             sh "sonar-scanner -Dsonar.projectKey=my-project -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.globalgreeninit.world -Dsonar.login=${env.SONARQUBE_TOKEN}"
                         }
                         snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '/client/package.json'
