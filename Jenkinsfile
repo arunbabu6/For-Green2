@@ -15,6 +15,7 @@ pipeline {
         TEST_DOCKER_HOST = 'ssh://test-user@test-docker-host'
         STAGE_DOCKER_HOST = 'ssh://stage-user@stage-docker-host'
         PROD_DOCKER_HOST = 'ssh://prod-user@prod-docker-host'
+        PROJECT_DIR = '/opt/docker-green'
     }
 
     stages {
@@ -65,21 +66,49 @@ pipeline {
             }
         }
 
-        stage('Prepare and Build') {
-            agent {
-                docker {
-                    image 'node:21'
-                }
-            }
-
+        stage('Stash Client') {
             steps {
                 dir('client') {
-                    sh 'npm install'
-                    sh 'npm run build'
-                    stash includes: '**', name: 'build-artifacts'
+                    stash includes: '**', name: 'client-src'
+                    }
+                }
+        }
+
+        stage('Prepare and Build') {
+            steps {
+                script {
+                    // Assuming DEMO_DOCKER_HOST is in the format ssh://user@host
+                    def sshHost = DEMO_DOCKER_HOST.replace('ssh://', '') // Removes ssh://
+                    // Using SSH to clean up and prepare build directory on the host machine
+                    sshagent([DEMO_SSH_CREDENTIALS]) {
+                        // Clean up the project directory on the host machine
+                        sh "ssh -o StrictHostKeyChecking=no ${sshHost} 'rm -rf ${PROJECT_DIR}/*'"
+
+                        // Copy the 'client' directory to the project directory on the host machine
+                        // Note: Adjust /path/to/client if your client directory's path is different in Jenkins workspace
+                        sh "scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/client ${sshHost}:${PROJECT_DIR}"
+                        // Execute build commands on the host machine
+                        sh "ssh -o StrictHostKeyChecking=no ${sshHost} 'cd ${PROJECT_DIR} && npm install && npm run build'"
+                    }
                 }
             }
         }
+
+      //  stage('Prepare and Build') {
+      //      agent {
+      //          docker {
+      //              image 'node:21'
+      //          }
+      //      }
+
+        //    steps {
+        //        dir('client') {
+        //            sh 'npm install'
+        //            sh 'npm run build'
+        //            stash includes: '**', name: 'build-artifacts'
+        //        }
+        //    }
+       // }
 
         stage('Analyze and Scan') {
             agent any
