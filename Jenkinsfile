@@ -82,7 +82,8 @@ pipeline {
                         // Assuming the build commands are here
                         sh 'npm install'
                         sh 'npm run build'
-                        stash includes: '**', name: 'build-artifacts'
+                        // Stash the build artifacts, excluding the node_modules directory
+                        stash excludes: 'node_modules/**', includes: '**', name: 'build-artifacts'
                     }
                 }
             }
