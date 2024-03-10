@@ -88,21 +88,26 @@ pipeline {
             }
         }
 
-        stage('Analyze and Scan') {
-            agent any
+        // SonarQube Analysis and Snyk Security Scan 
+        stage('SonarQube Analysis') {
             steps {
-                script {
-                    unstash 'build-artifacts'
-                    dir('client') {
-                        // Your SonarQube scan
-                        withSonarQubeEnv('sonar-docker') {
-                            sh "sonar-scanner -Dsonar.projectKey=my-project -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.globalgreeninit.world -Dsonar.login=${env.SONARQUBE_TOKEN}"
-                        }
-                        snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '/client/package.json'
-                    }
+                withSonarQubeEnv('sonar-docker') { // 'Sonarcube-cred' from |should match the SonarQube configuration in Jenkins
+                    sh """
+                      sonar-scanner \
+                      -Dsonar.projectKey=my-project \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=http://localhost:9009/ \
+                      -Dsonar.login=$SONARQUBE_TOKEN
+                    """
                 }
             }
         }
+
+        stage('Snyk Security Scan') {
+                     steps {
+                            snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '/client/package.json'
+                         }
+            }
 
         stage('Build and Push Docker Image') {
             agent any
