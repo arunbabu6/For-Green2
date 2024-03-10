@@ -129,50 +129,75 @@ pipeline {
                         sshagent(['jenkinaccess']) {
                             // Clear the 'artifacts' directory on the Docker host
                             sh "ssh ab@host.docker.internal 'rm -rf ${PROJECT_DIR}/artifacts/*'"
-                            // Correct the scp command to reference the local 'artifacts' directory correctly
-                            // This assumes all necessary files are now within the local 'artifacts' directory
                             sh "scp -rp artifacts/* ab@host.docker.internal:${PROJECT_DIR}/artifacts/"
                             // Build the Docker image on the Docker host
-                            sh "ssh ab@host.docker.internal 'cd ${PROJECT_DIR} && docker build -t ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} .'"
+                            sh "ssh ab@host.docker.internal 'cd ${PROJECT_DIR} && docker build -t ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} .'"
                         }
                         // Log in to DockerHub and push the image
                         withCredentials([usernamePassword(credentialsId: 'dockerhub1', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                            sh "ssh ab@host.docker.internal 'docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} && docker push ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'"
-                        }
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    if (env.DEMO_DOCKER_HOST && env.DEMO_SSH_CREDENTIALS) {
-                        sshagent([env.DEMO_SSH_CREDENTIALS]) {
                             sh """
-                                ssh -o StrictHostKeyChecking=no ${env.DEMO_DOCKER_HOST} <<EOF
-                                    docker pull ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
-                                    docker stop ${env.ENVIRONMENT.toLowerCase()}-app || true
-                                    docker rm ${env.ENVIRONMENT.toLowerCase()}-app || true
-                                    docker run -d --name ${env.ENVIRONMENT.toLowerCase()}-app -p 80:3000 ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
-                                EOF
+                                echo '${DOCKER_PASSWORD}' | ssh ab@host.docker.internal 'docker login -u ${DOCKER_USERNAME} --password-stdin' > /dev/null 2>&1
+                                ssh ab@host.docker.internal 'docker push ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'
                             """
                         }
-                    } else {
-                        echo "Deployment configuration not found for ${env.ENVIRONMENT}"
+
                     }
+            }
+        }
+
+        stage('Deploy') {      
+            agent any  
+            steps {
+                script {
+                    def sshHost = ''
+                    def sshCredentialsId = ''
+
+                    switch (ENVIRONMENT) {
+                        case 'Demo':
+                            sshHost = 'host.docker.internal'
+                            sshCredentialsId = 'dockerhub1'
+                            break
+                        case 'Testing':
+                            sshHost = 'ab@test-host.docker.internal'
+                            sshCredentialsId = 'test-ssh-credentials'
+                            break
+                        case 'Staging':
+                            sshHost = 'ab@staging-host.docker.internal'
+                            sshCredentialsId = 'staging-ssh-credentials'
+                            break
+                        case 'Production':
+                            sshHost = 'ab@production-host.docker.internal'
+                            sshCredentialsId = 'production-ssh-credentials'
+                            break
+                        default:
+                            echo "Environment configuration not found"
+                            return
+                    }
+
+                    sshagent([sshCredentialsId]) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no ${sshHost} '
+                            docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
+                            docker stop projectname-frontend || true &&
+                            docker rm projectname-frontend || true &&
+                            docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                            '
+                        """
+                        // Additional commands for backend container
+                    }   
                 }
             }
         }
-    }
 
     post {
-    always {
-        script {
-            if (env.ENVIRONMENT) {
-                echo "Pipeline execution completed for ${env.ENVIRONMENT}"
-            } else {
-                echo "Pipeline execution completed, but ENVIRONMENT was not set."
-            }
+        always {
+            script {
+                if (env.ENVIRONMENT) {
+                    echo "Pipeline execution completed for ${env.ENVIRONMENT}"
+                    } else {
+                        echo "Pipeline execution completed, but ENVIRONMENT was not set."
+                    }
+            }   
         }
     }
     }
