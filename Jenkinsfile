@@ -160,8 +160,9 @@ pipeline {
                                     docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
-                            break
                             }
+                            break
+                            
                         case 'Testing':
                             sshagent(['jenkinaccess']) {
                                 sh """
@@ -172,8 +173,9 @@ pipeline {
                                     docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
-                            break
                             }
+                            break
+                           
                         case 'Staging':
                             sshagent(['jenkinaccess']) {
                                 sh """
@@ -184,8 +186,9 @@ pipeline {
                                     docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
-                            break
                             }
+                            break
+                            
                         case 'Production':
                             sshagent(['jenkinaccess']) {
                                 sh """
@@ -196,8 +199,9 @@ pipeline {
                                     docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
-                            break
                             }
+                            break
+                            
                         default:
                             echo "Environment configuration not found"
                             return
