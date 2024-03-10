@@ -149,42 +149,69 @@ pipeline {
             agent any  
             steps {
                 script {
-                    def sshHost = ''
-                    def sshCredentialsId = ''
-
                     switch (ENVIRONMENT) {
                         case 'Demo':
                             sshHost = 'host.docker.internal'
                             sshCredentialsId = 'dockerhub1'
+                            sshagent([dockerhub1]) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no ${sshHost} '
+                                    docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
+                                    docker stop projectname-frontend || true &&
+                                    docker rm projectname-frontend || true &&
+                                    docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    '
+                            """
                             break
+                            }
                         case 'Testing':
-                            sshHost = 'ab@test-host.docker.internal'
-                            sshCredentialsId = 'test-ssh-credentials'
+                            sshHost = 'Testing-host.docker.internal'
+                            sshCredentialsId = 'dockerhub1'
+                            sshagent([dockerhub1]) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no ${sshHost} '
+                                    docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
+                                    docker stop projectname-frontend || true &&
+                                    docker rm projectname-frontend || true &&
+                                    docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    '
+                            """
                             break
+                            }
                         case 'Staging':
-                            sshHost = 'ab@staging-host.docker.internal'
-                            sshCredentialsId = 'staging-ssh-credentials'
+                            sshHost = 'Staging-host.docker.internal'
+                            sshCredentialsId = 'dockerhub1'
+                            sshagent([dockerhub1]) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no ${sshHost} '
+                                    docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
+                                    docker stop projectname-frontend || true &&
+                                    docker rm projectname-frontend || true &&
+                                    docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    '
+                            """
                             break
+                            }
                         case 'Production':
-                            sshHost = 'ab@production-host.docker.internal'
-                            sshCredentialsId = 'production-ssh-credentials'
+                            sshHost = 'Production-host.docker.internal'
+                            sshCredentialsId = 'dockerhub1'
+                            sshagent([dockerhub1]) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no ${sshHost} '
+                                    docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
+                                    docker stop projectname-frontend || true &&
+                                    docker rm projectname-frontend || true &&
+                                    docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    '
+                            """
                             break
+                            }
                         default:
                             echo "Environment configuration not found"
                             return
+
                     }
 
-                    sshagent([sshCredentialsId]) {
-                        sh """
-                            ssh -o StrictHostKeyChecking=no ${sshHost} '
-                            docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
-                            docker stop projectname-frontend || true &&
-                            docker rm projectname-frontend || true &&
-                            docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
-                            '
-                        """
-                        // Additional commands for backend container
-                    }   
                 }
             }
         }
