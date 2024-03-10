@@ -7,7 +7,7 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('Dockerhub')
         // SSH credentials for each environment
         DEMO_SSH_CREDENTIALS = credentials('ssh-wsl')
-        ssh-dockerhost = credentials('jenkinaccess')
+        SSH_DOCKERHOST = credentials('jenkinaccess')
         TEST_SSH_CREDENTIALS = credentials('test-ssh-credentials-id')
         STAGE_SSH_CREDENTIALS = credentials('stage-ssh-credentials-id')
         PROD_SSH_CREDENTIALS = credentials('prod-ssh-credentials-id')
@@ -81,7 +81,7 @@ pipeline {
                     // Assuming DEMO_DOCKER_HOST is in the format ssh://user@host
                     def sshHost = DEMO_DOCKER_HOST.replace('ssh://', '') // Removes ssh://
                     // Using SSH to clean up and prepare build directory on the host machine
-                    sshagent([ssh-dockerhost]) {
+                    sshagent([SSH_DOCKERHOST]) {
                         // Clean up the project directory on the host machine
                         sh "ssh -o StrictHostKeyChecking=no ${sshHost} 'rm -rf ${PROJECT_DIR}/*'"
 
