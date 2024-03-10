@@ -83,11 +83,11 @@ pipeline {
                         // Snyk scan (corrected placement and syntax)
                         //withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
                             snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: '/client/package.json'
-                        }
                     }
                 }
             }
         }
+        
 
         stage('Build and Push Docker Image') {
             steps {
@@ -100,6 +100,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Deploy') {
             steps {
