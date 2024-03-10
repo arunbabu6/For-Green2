@@ -117,6 +117,7 @@ pipeline {
         }
 
         stage('Lint') {
+            agent any
             steps {
                 dir('client') { // Ensure we're inside the 'client' directory where package.json is located
                                 // Execute the lint script and allow the build to fail on lint errors
