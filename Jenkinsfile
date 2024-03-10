@@ -151,10 +151,9 @@ pipeline {
                 script {
                     switch (ENVIRONMENT) {
                         case 'Demo':
-                            sshHost = 'host.docker.internal'
                             sshagent(['dockerhub1']) {
                                 sh """
-                                    ssh -o StrictHostKeyChecking=no ${sshHost} '
+                                    ssh -o StrictHostKeyChecking=no host.docker.internal '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
                                     docker rm projectname-frontend || true &&
@@ -164,10 +163,9 @@ pipeline {
                             break
                             }
                         case 'Testing':
-                            sshHost = 'Testing-host.docker.internal'
                             sshagent(['dockerhub1']) {
                                 sh """
-                                    ssh -o StrictHostKeyChecking=no ${sshHost} '
+                                    ssh -o StrictHostKeyChecking=no Testing-host.docker.internal '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
                                     docker rm projectname-frontend || true &&
@@ -177,10 +175,9 @@ pipeline {
                             break
                             }
                         case 'Staging':
-                            sshHost = 'Staging-host.docker.internal'
                             sshagent(['dockerhub1']) {
                                 sh """
-                                    ssh -o StrictHostKeyChecking=no ${sshHost} '
+                                    ssh -o StrictHostKeyChecking=no Staging-host.docker.internal '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
                                     docker rm projectname-frontend || true &&
@@ -190,10 +187,9 @@ pipeline {
                             break
                             }
                         case 'Production':
-                            sshHost = 'Production-host.docker.internal'
                             sshagent(['dockerhub1']) {
                                 sh """
-                                    ssh -o StrictHostKeyChecking=no ${sshHost} '
+                                    ssh -o StrictHostKeyChecking=no Production-host.docker.internal '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
                                     docker rm projectname-frontend || true &&
