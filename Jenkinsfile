@@ -40,8 +40,16 @@ pipeline {
 
         stage('Clean Workspace') {
             steps {
-                deleteDir()
-            }
+                 script {
+                  // Check if the current workspace directory exists
+                    if (fileExists('.')) {
+                    // If it exists, delete the workspace directory and its contents
+                         deleteDir()
+                    } else {
+                         echo "Workspace directory does not exist, no need to delete."
+                         }
+                 }
+             }
         }
 
         stage('Use Artifacts') {
