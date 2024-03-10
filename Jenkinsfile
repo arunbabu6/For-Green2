@@ -108,7 +108,7 @@ pipeline {
             agent any
             steps {
                 dir('client') {
-                snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: 'package.json'
+                snykSecurity failOnError: false, failOnIssues: false, organisation: 'Group2-Global-Green', projectName: 'For-Green2-new', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: 'package.json'
                 }
 
             }
