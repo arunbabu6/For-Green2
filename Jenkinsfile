@@ -6,7 +6,7 @@ pipeline {
         SONARQUBE_TOKEN = credentials('sonar-docker')
         DOCKERHUB_CREDENTIALS = credentials('Dockerhub')
         // SSH credentials for each environment
-        DEMO_SSH_CREDENTIALS = credentials('jenkinaccess')
+        DEMO_SSH_CREDENTIALS = credentials('ssh-wsl')
         TEST_SSH_CREDENTIALS = credentials('test-ssh-credentials-id')
         STAGE_SSH_CREDENTIALS = credentials('stage-ssh-credentials-id')
         PROD_SSH_CREDENTIALS = credentials('prod-ssh-credentials-id')
