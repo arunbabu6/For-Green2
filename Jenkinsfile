@@ -188,7 +188,7 @@ pipeline {
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
                                     docker rm projectname-frontend || true &&
-                                    docker run -d --name projectname-frontend -p 8090:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-frontend -p 8090:80 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
                             }
@@ -201,7 +201,7 @@ pipeline {
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
                                     docker rm projectname-frontend || true &&
-                                    docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-frontend -p 8090:80 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
                             }
@@ -214,7 +214,7 @@ pipeline {
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
                                     docker rm projectname-frontend || true &&
-                                    docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-frontend -p 8090:80 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
                             }
@@ -227,7 +227,7 @@ pipeline {
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
                                     docker rm projectname-frontend || true &&
-                                    docker run -d --name projectname-frontend -p 80:3000 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-frontend -p 8090:80 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
                             }
