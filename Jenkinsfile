@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'arunthopil/pro-green-v2'
         SONARQUBE_TOKEN = credentials('sonar-docker')
-        DOCKERHUB_CREDENTIALS = credentials('Dockerhub')
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub1')
         // SSH credentials for each environment
         DEMO_SSH_CREDENTIALS = credentials('ssh-wsl')
         TEST_SSH_CREDENTIALS = credentials('test-ssh-credentials-id')
@@ -108,7 +108,8 @@ pipeline {
             agent any
             steps {
                 dir('client') {
-                snykSecurity failOnError: false, failOnIssues: false, organisation: 'arunbabu6', projectName: 'For-Green2-new', snykInstallation: 'Snyk', snykTokenId: 'snyk-token'
+        //        snykSecurity failOnError: false, failOnIssues: false, organisation: 'arunbabu6', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token', targetFile: 'package.json'
+                snykSecurity failOnError: false, failOnIssues: false, organisation: 'arunbabu6', projectName: 'For-Green2', snykInstallation: 'Snyk', snykTokenId: 'snyk-token'
                 }
 
             }
@@ -118,14 +119,25 @@ pipeline {
             agent any
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'Dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        // Logging into Docker
-                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                        // Building the Docker image, tag it accordingly
-                        sh "docker build -t ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} ."
-                        // Pushing the Docker image to DockerHub
-                        sh "docker push ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
-                    }
+                    // Create a directory 'artifacts' in the Jenkins workspace to hold the unstashed files
+                    sh "mkdir -p artifacts"
+                    dir('artifacts') {
+                        // Unstash the build artifacts into this 'artifacts' directory
+                        unstash 'build-artifacts'
+                        }
+                        sshagent(['jenkinaccess']) {
+                            // Clear the 'artifacts' directory on the Docker host
+                            sh "ssh ab@host.docker.internal 'rm -rf ${PROJECT_DIR}/artifacts/*'"
+                            // Correct the scp command to reference the local 'artifacts' directory correctly
+                            // This assumes all necessary files are now within the local 'artifacts' directory
+                            sh "scp -rp artifacts/* ab@host.docker.internal:${PROJECT_DIR}/artifacts/"
+                            // Build the Docker image on the Docker host
+                            sh "ssh ab@host.docker.internal 'cd ${PROJECT_DIR} && docker build -t ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} .'"
+                        }
+                        // Log in to DockerHub and push the image
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub1', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                            sh "ssh ab@host.docker.internal 'docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} && docker push ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'"
+                        }
                 }
             }
         }
