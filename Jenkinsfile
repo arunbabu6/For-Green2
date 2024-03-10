@@ -152,8 +152,7 @@ pipeline {
                     switch (ENVIRONMENT) {
                         case 'Demo':
                             sshHost = 'host.docker.internal'
-                            sshCredentialsId = 'dockerhub1'
-                            sshagent([dockerhub1]) {
+                            sshagent(['dockerhub1']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ${sshHost} '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
@@ -166,8 +165,7 @@ pipeline {
                             }
                         case 'Testing':
                             sshHost = 'Testing-host.docker.internal'
-                            sshCredentialsId = 'dockerhub1'
-                            sshagent([dockerhub1]) {
+                            sshagent(['dockerhub1']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ${sshHost} '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
@@ -180,8 +178,7 @@ pipeline {
                             }
                         case 'Staging':
                             sshHost = 'Staging-host.docker.internal'
-                            sshCredentialsId = 'dockerhub1'
-                            sshagent([dockerhub1]) {
+                            sshagent(['dockerhub1']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ${sshHost} '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
@@ -194,8 +191,7 @@ pipeline {
                             }
                         case 'Production':
                             sshHost = 'Production-host.docker.internal'
-                            sshCredentialsId = 'dockerhub1'
-                            sshagent([dockerhub1]) {
+                            sshagent(['dockerhub1']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ${sshHost} '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
