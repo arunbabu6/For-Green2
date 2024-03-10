@@ -67,6 +67,7 @@ pipeline {
         }
 
         stage('Stash Client') {
+            agent any
             steps {
                 dir('client') {
                     stash includes: '**', name: 'client-src'
@@ -75,6 +76,7 @@ pipeline {
         }
 
         stage('Prepare and Build') {
+            agent any
             steps {
                 script {
                     // Assuming DEMO_DOCKER_HOST is in the format ssh://user@host
