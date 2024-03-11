@@ -268,7 +268,7 @@ pipeline {
     post {
         always {
             script {
-                archiveArtifacts artifacts: ${filename}, onlyIfSuccessful: true
+                archiveArtifacts artifacts: "frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html", onlyIfSuccessful: true
             }
             publishHTML (target: [
                 allowMissing: false,
@@ -289,4 +289,3 @@ pipeline {
         }
     }
 }
-
