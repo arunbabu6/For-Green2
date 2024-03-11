@@ -1,5 +1,5 @@
 pipeline {
-    agent none
+    agent any
 
     environment {
         DOCKER_IMAGE = 'arunthopil/pro-green-v2'
@@ -262,21 +262,22 @@ pipeline {
     }
 
     post {
-        agent any
-         always {
+        always {
             script {
-                // Read the filename from the file
-                 def filename = readFile('filename.txt').trim()
-                // Archive the artifact for this build
-                archiveArtifacts artifacts: filename, onlyIfSuccessful: true
-            }
-            script {
+                // This block is fine as long as it's within the overall pipeline that has an agent allocated
+                def filename = ''
+                try {
+                    filename = readFile('filename.txt').trim()
+                    archiveArtifacts artifacts: filename, onlyIfSuccessful: true
+                }
+                } catch (Exception e) {
+                    echo "Error reading filename or archiving artifacts: ${e.message}"
+                }
                 if (env.ENVIRONMENT) {
                     echo "Pipeline execution completed for ${env.ENVIRONMENT}"
-                    } else {
-                        echo "Pipeline execution completed, but ENVIRONMENT was not set."
-                    }
-            }
+                } else {
+                    echo "Pipeline execution completed, but ENVIRONMENT was not set."
+                }
         }
     }
 }
