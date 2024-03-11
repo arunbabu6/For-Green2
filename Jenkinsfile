@@ -181,7 +181,6 @@ pipeline {
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
                         trivy image --format template --template '/opt/docker-green/Trivy/trivy-template.tpl' --output '/opt/jenkins-green/${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.md' ${image}
-                        trivy image --format template --template '/opt/docker-green/Trivy/trivy-template.tpl' --output '/opt/jenkins-green/${image}-scanning.md' ${image}
                         """.trim()
                         // Execute the command on the remote host
                         sh "ssh -o StrictHostKeyChecking=no ab@host.docker.internal '${scanCommand.replaceAll("\n", " && ")}'"
