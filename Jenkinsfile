@@ -264,17 +264,18 @@ pipeline {
 
     post {
         always {
-            script {
-                // This block is fine as long as it's within the overall pipeline that has an agent allocated
-                def filename = ''
-                try {
-                        archiveArtifacts artifacts: "${filename}", onlyIfSuccessful: true
-                    //archiveArtifacts artifacts: 'frontend-*-*-scanning.html', onlyIfSuccessful: true
+            archiveArtifacts: 'frontend-*-*-scanning.html' , fingerprint: true
 
-                }
-                catch (Exception e) {
-                    echo "Error reading filename or archiving artifacts: ${e.message}"
-                }
+            publishHTML target: [
+                allowMissing: false,
+                allowLinkToLastBuild: false,
+                keepAll: true,
+                reportDir:".",
+                reportFiles: "frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html",
+                reportName: "Trivy Report"
+            ]
+            script {
+
                 if (env.ENVIRONMENT) {
                     echo "Pipeline execution completed for ${env.ENVIRONMENT}"
                 } else {
