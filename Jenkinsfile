@@ -186,8 +186,8 @@ pipeline {
                 script {
                     def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
                     echo "Scanning ${image} with Trivy..."
-                    sh "trivy image --format json --output trivy-report.json ${image}"
-                    //sh "trivy image ${image}"
+                    //sh "trivy image --format json --output trivy-report.json ${image}"
+                    sh "trivy image ${image} > ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.txt"
                     archiveArtifacts artifacts: 'trivy-report.json', onlyIfSuccessful: true
                 }
             }
