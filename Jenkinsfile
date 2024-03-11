@@ -172,11 +172,14 @@ pipeline {
             agent any
             steps {
                 script {
+
+                    def filename = "frontend-${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.md"
                     def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
                     sh "trivy image --download-db-only"
                     echo "Scanning ${image} with Trivy..."
-                    sh "trivy image --format json --output trivy-report.json ${image}"
-                    archiveArtifacts artifacts: 'trivy-report.json', onlyIfSuccessful: true
+                    //sh "trivy image --format json --output trivy-report.json ${image}"
+                    sh "trivy image --format template --template '@/opt/docker-green/Trivy/trivy-template.tpl' --o '/opt/docker-green/Trivy/${filename}' ${image}"                     
+                    archiveArtifacts artifacts: 'trivy-report.md', onlyIfSuccessful: true
                 }
             }
         }
