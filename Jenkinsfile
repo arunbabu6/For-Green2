@@ -262,6 +262,7 @@ pipeline {
     }
 
     post {
+        agent any
          always {
             script {
                 // Read the filename from the file
