@@ -181,7 +181,7 @@ pipeline {
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template "/opt/docker-green/Trivy/trivy-template.tpl" --output "/opt/docker-green/Trivy/frontend-demo-722-scanning.md" "arunthopil/pro-green-v2-frontend:demo-73"
+                        trivy image --format template --template "/opt/docker-green/Trivy/trivy-template.tpl" --output "/opt/docker-green/Trivy/frontend-demo-722-scanning.md" "arunthopil/pro-green-v2-frontend:demo-75"
                         '
                         """
                         //trivy image --format template --template "/opt/docker-green/Trivy/trivy-template.tpl" --output "/opt/docker-green/Trivy/${filename}" "${image}"
