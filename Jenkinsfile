@@ -264,7 +264,8 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts: 'frontend-*-*-scanning.html' , fingerprint: true
+
+            archiveArtifacts artifacts: 'frontend-*-*-scanning.html', fingerprint: true
 
             publishHTML target: [
                 allowMissing: false,
