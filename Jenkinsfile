@@ -181,6 +181,7 @@ pipeline {
     
         // Stage to scan with Trivy
         stage('Trivy Vulnerability Scan') {
+            agent any
             steps {
                 script {
                     def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
@@ -190,7 +191,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Deploy') {      
             agent any  
             steps {
