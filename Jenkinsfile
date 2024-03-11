@@ -270,7 +270,7 @@ pipeline {
                     filename = readFile('filename.txt').trim()
                     archiveArtifacts artifacts: filename, onlyIfSuccessful: true
                 }
-                } catch (Exception e) {
+                catch (Exception e) {
                     echo "Error reading filename or archiving artifacts: ${e.message}"
                 }
                 if (env.ENVIRONMENT) {
@@ -278,6 +278,7 @@ pipeline {
                 } else {
                     echo "Pipeline execution completed, but ENVIRONMENT was not set."
                 }
+            }
         }
     }
 }
