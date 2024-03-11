@@ -181,7 +181,7 @@ pipeline {
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template /opt/docker-green/Trivy/trivy-template.tpl --output /opt/docker-green/Trivy/${filename} ${image}'
+                        trivy image --format template --template "/opt/docker-green/Trivy/trivy-template.tpl" --output "/opt/docker-green/Trivy/${filename}" "${image}"'
                         """
                         // Copy the scan report back to Jenkins workspace
                         sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/"
@@ -262,6 +262,8 @@ pipeline {
 
     post {
         always {
+            // Archive the artifact for this build
+            archiveArtifacts artifacts: "${filename}", onlyIfSuccessful: true
             script {
                 if (env.ENVIRONMENT) {
                     echo "Pipeline execution completed for ${env.ENVIRONMENT}"
