@@ -175,12 +175,13 @@ pipeline {
                     script {
                         // Define the image variable outside the SSH/sh block to ensure correct interpolation
                         def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
+                        def filename = "frontend-${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
                         // Prepare the command to execute on the Docker host
                         def scanCommand = """
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template /opt/docker-green/Trivy/trivy-template.tpl --output /opt/jenkins-green/Trivy/${image.replaceAll(":", "-")}-scanning.md ${image}'
+                        trivy image --format template --template /opt/docker-green/Trivy/trivy-template.tpl --output /opt/jenkins-green/Trivy/${filename.replaceAll(":", "-")}-scanning.md ${image}'
                         """.trim()
                         // Execute the command on the remote host
                         sh "ssh -o StrictHostKeyChecking=no ab@host.docker.internal '${scanCommand}'"
