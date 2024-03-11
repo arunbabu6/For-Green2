@@ -181,10 +181,11 @@ pipeline {
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template "/opt/docker-green/Trivy/trivy-template.tpl" --output "/opt/docker-green/Trivy/${filename}" "${image}"'
+                        trivy image --format template --template "/opt/docker-green/Trivy/trivy-template.tpl" --output "/opt/docker-green/Trivy/${filename}" "${image}"
+                        '
                         """
                         // Copy the scan report back to Jenkins workspace
-                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/"
+                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/${filename}"
                         // Output the contents of the scan report to the Jenkins console
                         sh "cat ${WORKSPACE}/${filename}"
                     }
@@ -261,16 +262,20 @@ pipeline {
     }
 
     post {
-        always {
-            // Archive the artifact for this build
-            archiveArtifacts artifacts: "${filename}", onlyIfSuccessful: true
+         always {
+            script {
+                // Read the filename from the file
+                 def filename = readFile('filename.txt').trim()
+                // Archive the artifact for this build
+                archiveArtifacts artifacts: filename, onlyIfSuccessful: true
+            }
             script {
                 if (env.ENVIRONMENT) {
                     echo "Pipeline execution completed for ${env.ENVIRONMENT}"
                     } else {
                         echo "Pipeline execution completed, but ENVIRONMENT was not set."
                     }
-            }   
+            }
         }
     }
 }
