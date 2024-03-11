@@ -167,6 +167,30 @@ pipeline {
             }
         }
 
+        // Stage to update Trivy's DB
+        stage('Update Trivy DB') {
+            agent any
+            steps {
+                script {
+                    echo 'Updating Trivy database...'
+                    sh 'trivy image --download-db-only'
+                    echo 'Trivy database update completed.'
+                }
+            }
+        }
+    
+        // Stage to scan with Trivy
+        stage('Trivy Vulnerability Scan') {
+            steps {
+                script {
+                    def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
+                    echo "Scanning ${image} with Trivy..."
+                    sh "trivy image --format json --output trivy-report.json ${image}"
+                    archiveArtifacts artifacts: 'trivy-report.json', onlyIfSuccessful: true
+                }
+            }
+        }
+        
         stage('Deploy') {      
             agent any  
             steps {
