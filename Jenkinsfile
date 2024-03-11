@@ -268,7 +268,9 @@ pipeline {
                 // This block is fine as long as it's within the overall pipeline that has an agent allocated
                 def filename = ''
                 try {
-                    archiveArtifacts artifacts: "${filename}", onlyIfSuccessful: true
+                   // archiveArtifacts artifacts: "${filename}", onlyIfSuccessful: true
+                    archiveArtifacts artifacts: 'frontend-*-*-scanning.html', onlyIfSuccessful: true
+
                 }
                 catch (Exception e) {
                     echo "Error reading filename or archiving artifacts: ${e.message}"
