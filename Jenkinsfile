@@ -181,7 +181,7 @@ pipeline {
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template '/opt/docker-green/Trivy/html.tpl' --output '/opt/docker-green/Trivy/${filename}' ${image}
+                        trivy image --format template --template "@/opt/docker-green/Trivy/html.tpl" -o "/opt/docker-green/Trivy/${filename}" ${image}
                         '
                         """
                         //sh "echo 'frontend-demo-722-scanning.md' > ${WORKSPACE}/filename1.txt"
