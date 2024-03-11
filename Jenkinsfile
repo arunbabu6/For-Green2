@@ -174,14 +174,14 @@ pipeline {
                 sshagent(['jenkinaccess']) {
                     script {
                         def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
-                        def filename = "frontend-${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.html"
+                        def filename = "frontend-${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.md"
                         // Execute the command sequence on the remote host
                         sh """
                         ssh -o StrictHostKeyChecking=no ab@host.docker.internal '
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template "@/opt/docker-green/Trivy/html.tpl" -o "/opt/docker-green/Trivy/filename.html" ${image}
+                        trivy image --format template --template "@/opt/docker-green/Trivy/trivy-template.tpl" --output "/opt/docker-green/Trivy/${filename}" "${image}"'
                         '
                         """
                         //                        trivy image --format template --template "@/opt/docker-green/Trivy/html.tpl" -o "/opt/docker-green/Trivy/${filename} ${image}
@@ -189,7 +189,7 @@ pipeline {
                         //sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/filename.html"
                         //sh "echo 'frontend-demo-722-scanning.md' > ${WORKSPACE}/filename1.txt"
                         // Copy the scan report back to Jenkins workspace
-                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/filename.html ${WORKSPACE}/filename.html"
+                        //sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/filename.html ${WORKSPACE}/filename.html"
                         //                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/${filename}"
 
                         //sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html ${WORKSPACE}/frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html"
@@ -197,7 +197,8 @@ pipeline {
                         //sh "cp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} > ${WORKSPACE}/filename.html"
                         //sh "cp ${WORKSPACE}/${filename} ${WORKSPACE}/filename.html"
                         // Output the contents of the scan report to the Jenkins console
-                        sh "cat ${WORKSPACE}/filename.html"
+                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/${filename}"
+                        sh "cat ${WORKSPACE}/${filename}"
                         //                        sh "cat ${WORKSPACE}/${filename}"
 
                     }
@@ -275,17 +276,10 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: filename.html, onlyIfSuccessful: true
-
-            publishHTML (target: [
-                allowMissing: false,
-                allowLinkToLastBuild: false,
-                keepAll: true,
-                reportDir:".",
-                reportFiles: "filename.html",
-                reportName: "Trivy Report"
-            ])
             script {
+                def filename = readFile("${WORKSPACE}/filename.txt").trim()
+                archiveArtifacts artifacts: filename, onlyIfSuccessful: true
+            
 
                 if (env.ENVIRONMENT) {
                     echo "Pipeline execution completed for ${env.ENVIRONMENT}"
