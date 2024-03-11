@@ -178,11 +178,10 @@ pipeline {
                         // Execute the command sequence on the remote host
                         sh """
                         ssh -o StrictHostKeyChecking=no ab@host.docker.internal '
-                        mkdir -p /opt/jenkins-green/Trivy &&  # Ensure the directory exists
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template /opt/docker-green/Trivy/trivy-template.tpl --output /opt/jenkins-green/Trivy/${filename} ${image}'
+                        trivy image --format template --template /opt/docker-green/Trivy/trivy-template.tpl --output /opt/docker-green/Trivy/${filename} ${image}'
                         """
                     }
                 }
