@@ -184,11 +184,12 @@ pipeline {
                         trivy image --format template --template "@/opt/docker-green/Trivy/html.tpl" -o "/opt/docker-green/Trivy/${filename}" ${image}
                         '
                         """
+                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/filename.html"
                         //sh "echo 'frontend-demo-722-scanning.md' > ${WORKSPACE}/filename1.txt"
                         // Copy the scan report back to Jenkins workspace
-                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/${filename}"
+                        //sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/${filename}"
                         //sh "cp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} > ${WORKSPACE}/filename.html"
-                        sh "cp ${WORKSPACE}/${filename} ${WORKSPACE}/filename.html"
+                        //sh "cp ${WORKSPACE}/${filename} ${WORKSPACE}/filename.html"
                         // Output the contents of the scan report to the Jenkins console
                         sh "cat ${WORKSPACE}/${filename}"
                     }
@@ -274,7 +275,7 @@ pipeline {
                 allowLinkToLastBuild: false,
                 keepAll: true,
                 reportDir:".",
-                reportFiles: "frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html",
+                reportFiles: "filename.html",
                 reportName: "Trivy Report"
             ]
             script {
