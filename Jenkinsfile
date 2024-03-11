@@ -181,7 +181,7 @@ pipeline {
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template "@/opt/docker-green/Trivy/html.tpl" -o "/opt/docker-green/Trivy/filename.html ${image}
+                        trivy image --format template --template "@/opt/docker-green/Trivy/html.tpl" -o "/opt/docker-green/Trivy/filename.html" ${image}
                         '
                         """
                         //                        trivy image --format template --template "@/opt/docker-green/Trivy/html.tpl" -o "/opt/docker-green/Trivy/${filename} ${image}
@@ -245,8 +245,8 @@ pipeline {
                                     docker rm projectname-frontend || true &&
                                     docker run -d --name projectname-frontend -p 8090:80 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
-                            """
-                            }
+                                    """
+                                }
                             break
                             
                         case 'Production':
