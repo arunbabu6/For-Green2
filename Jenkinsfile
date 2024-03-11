@@ -167,32 +167,28 @@ pipeline {
             }
         }
 
-        // Stage to update Trivy's DB
-        stage('Update Trivy DB') {
+        // Stage to update Trivy's DB and Vulnerability scan
+        stage('Trivy Container Scan') {
             agent any
             steps {
-                script {
-                    echo 'Updating Trivy database...'
-                    sh 'trivy image --download-db-only'
-                    echo 'Trivy database update completed.'
+                sshagent(['jenkinaccess']) {
+                    script {
+                        // Define the image variable outside the SSH/sh block to ensure correct interpolation
+                        def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
+                        // Prepare the command to execute on the Docker host
+                        def scanCommand = """
+                        echo Updating Trivy database...
+                        trivy image --download-db-only
+                        echo Trivy database update completed.
+                        trivy image --format template --template '/opt/docker-green/Trivy/trivy-template.tpl' --output '/opt/jenkins-green/${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.md' ${image}
+                        """
+                        // Execute the command on the remote host
+                        sh "ssh -o StrictHostKeyChecking=no ab@host.docker.internal '${scanCommand.replaceAll("\n", " && ")}'"
+                    }
                 }
             }
         }
     
-        // Stage to scan with Trivy
-        stage('Trivy Vulnerability Scan') {
-            agent any
-            steps {
-                script {
-                    def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
-                    echo "Scanning ${image} with Trivy..."
-                    //sh "trivy image --format json --output trivy-report.json ${image}"
-                    sh "trivy image ${image} > ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.txt"
-                    archiveArtifacts artifacts: 'trivy-report.json', onlyIfSuccessful: true
-                }
-            }
-        }
-
         stage('Deploy') {      
             agent any  
             steps {
