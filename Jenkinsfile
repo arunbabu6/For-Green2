@@ -181,14 +181,14 @@ pipeline {
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template "@/opt/docker-green/Trivy/html.tpl" -o "/opt/docker-green/Trivy/frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html" ${image}
+                        trivy image --format template --template "@/opt/docker-green/Trivy/html.tpl" -o "/opt/docker-green/Trivy/${filename} ${image}
                         '
                         """
                         //sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/filename.html"
                         //sh "echo 'frontend-demo-722-scanning.md' > ${WORKSPACE}/filename1.txt"
                         // Copy the scan report back to Jenkins workspace
-                        //sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/${filename}"
-                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html ${WORKSPACE}/frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html"
+                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/${filename}"
+                        //sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html ${WORKSPACE}/frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html"
                         //frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html
                         //sh "cp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} > ${WORKSPACE}/filename.html"
                         //sh "cp ${WORKSPACE}/${filename} ${WORKSPACE}/filename.html"
@@ -269,9 +269,8 @@ pipeline {
 
     post {
         always {
-            script {
-                archiveArtifacts artifacts: "frontend-${env.ENVIRONMENT}-${env.BUILD_NUMBER}-scanning.html", onlyIfSuccessful: true
-            }
+            def reportFilename = "frontend-${env.ENVIRONMENT?.toLowerCase()}-${env.BUILD_NUMBER}-scanning.html"
+
             publishHTML (target: [
                 allowMissing: false,
                 allowLinkToLastBuild: false,
