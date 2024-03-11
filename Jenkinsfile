@@ -264,9 +264,11 @@ pipeline {
 
     post {
         always {
-
-            archiveArtifacts artifacts: "frontend-${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.html", onlyIfSuccessful: true
-
+            script {
+                def envLower = env.ENVIRONMENT.toLowerCase()
+                def filename = "frontend-${envLower}-${env.BUILD_NUMBER}-scanning.html"
+                archiveArtifacts artifacts: "${filename}", onlyIfSuccessful: true
+            }
             publishHTML target: [
                 allowMissing: false,
                 allowLinkToLastBuild: false,
