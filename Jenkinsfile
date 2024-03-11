@@ -265,7 +265,7 @@ pipeline {
     post {
         always {
 
-            archiveArtifacts artifacts: 'frontend-*-*-scanning.html', fingerprint: true
+            archiveArtifacts artifacts: "**/frontend-${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.html", onlyIfSuccessful: true
 
             publishHTML target: [
                 allowMissing: false,
