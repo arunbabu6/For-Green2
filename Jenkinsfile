@@ -178,7 +178,7 @@ pipeline {
                     sh "trivy image --download-db-only"
                     echo "Scanning ${image} with Trivy..."
                     //sh "trivy image --format json --output trivy-report.json ${image}"
-                    sh "trivy image --format template --template '@/opt/docker-green/Trivy/trivy-template.tpl' -o '/opt/docker-green/Trivy/${filename}' ${image}"                     
+                    sh "trivy image --format template --template '@/opt/docker-green/Trivy/trivy-template.tpl' -o '/opt/docker-green/Trivy/trivy-report.md' ${image}"                     
                     archiveArtifacts artifacts: 'trivy-report.md', onlyIfSuccessful: true
                 }
             }
