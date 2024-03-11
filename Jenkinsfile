@@ -187,7 +187,7 @@ pipeline {
                         //sh "echo 'frontend-demo-722-scanning.md' > ${WORKSPACE}/filename1.txt"
                         // Copy the scan report back to Jenkins workspace
                         sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/${filename}"
-                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} > ${WORKSPACE}/filename.html"
+                        sh "cp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} > ${WORKSPACE}/filename.html"
                         // Output the contents of the scan report to the Jenkins console
                         sh "cat ${WORKSPACE}/${filename}"
                     }
