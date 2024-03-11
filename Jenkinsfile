@@ -183,11 +183,15 @@ pipeline {
                         echo Trivy database update completed. &&
                         trivy image --format template --template /opt/docker-green/Trivy/trivy-template.tpl --output /opt/docker-green/Trivy/${filename} ${image}'
                         """
+                        // Copy the scan report back to Jenkins workspace
+                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/"
+                        // Output the contents of the scan report to the Jenkins console
+                        sh "cat ${WORKSPACE}/${filename}"
                     }
                 }
             }
         }
-    
+
         stage('Deploy') {      
             agent any  
             steps {
