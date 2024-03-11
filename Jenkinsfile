@@ -251,8 +251,8 @@ pipeline {
 
     post {
         always {
-            
-         
+            script{
+                   
                 if (env.ENVIRONMENT) {
                     echo "Pipeline execution completed for ${env.ENVIRONMENT}"
                 } else {
@@ -260,6 +260,7 @@ pipeline {
                 }
             }
         }
+    }
 }
 
 
