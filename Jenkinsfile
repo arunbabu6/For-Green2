@@ -270,6 +270,7 @@ pipeline {
     post {
         always {
             def reportFilename = "frontend-${env.ENVIRONMENT?.toLowerCase()}-${env.BUILD_NUMBER}-scanning.html"
+            archiveArtifacts artifacts: reportFilename, onlyIfSuccessful: true
 
             publishHTML (target: [
                 allowMissing: false,
