@@ -174,17 +174,17 @@ pipeline {
                 sshagent(['jenkinaccess']) {
                     script {
                         def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
-                        def filename = "frontend-${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.md"
+                        def filename = "frontend-${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}-scanning.html"
                         // Execute the command sequence on the remote host
                         sh """
                         ssh -o StrictHostKeyChecking=no ab@host.docker.internal '
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template '/opt/docker-green/Trivy/trivy-template.tpl' --output '/opt/docker-green/Trivy/${filename}' ${image}
+                        trivy image --format template --template '/opt/docker-green/Trivy/html.tpl' --output '/opt/docker-green/Trivy/${filename}' ${image}
                         '
                         """
-                        sh "echo 'frontend-demo-722-scanning.md' > ${WORKSPACE}/filename1.txt"
+                        //sh "echo 'frontend-demo-722-scanning.md' > ${WORKSPACE}/filename1.txt"
                         // Copy the scan report back to Jenkins workspace
                         sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/${filename}"
                         // Output the contents of the scan report to the Jenkins console
