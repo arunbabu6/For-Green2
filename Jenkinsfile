@@ -270,14 +270,14 @@ pipeline {
             script {
                 archiveArtifacts artifacts: 'filename.html', onlyIfSuccessful: true
             }
-            publishHTML target: [
+            publishHTML target: ([
                 allowMissing: false,
                 allowLinkToLastBuild: false,
                 keepAll: true,
                 reportDir:".",
                 reportFiles: "filename.html",
                 reportName: "Trivy Report"
-            ]
+            ])
             script {
 
                 if (env.ENVIRONMENT) {
