@@ -181,9 +181,13 @@ pipeline {
                         echo Updating Trivy database... &&
                         trivy image --download-db-only &&
                         echo Trivy database update completed. &&
-                        trivy image --format template --template "/opt/docker-green/Trivy/trivy-template.tpl" --output "/opt/docker-green/Trivy/${filename}" "${image}"
+                        sh trivy image --format template --template "/opt/docker-green/Trivy/trivy-template.tpl" --output "/opt/docker-green/Trivy/frontend-demo-722-scanning.md" "arunthopil/pro-green-v2-frontend:demo-722"
                         '
                         """
+                        //trivy image --format template --template "/opt/docker-green/Trivy/trivy-template.tpl" --output "/opt/docker-green/Trivy/${filename}" "${image}"
+
+                        sh "echo 'frontend-demo-722-scanning.md' > ${WORKSPACE}/filename1.txt"
+
                         // Copy the scan report back to Jenkins workspace
                         sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/${filename} ${WORKSPACE}/${filename}"
                         // Output the contents of the scan report to the Jenkins console
@@ -267,7 +271,7 @@ pipeline {
                 // This block is fine as long as it's within the overall pipeline that has an agent allocated
                 def filename = ''
                 try {
-                    filename = readFile('filename.txt').trim()
+                    filename = readFile('filename1.txt').trim()
                     archiveArtifacts artifacts: filename, onlyIfSuccessful: true
                 }
                 catch (Exception e) {
