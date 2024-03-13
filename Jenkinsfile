@@ -75,7 +75,7 @@ pipeline {
                 script {
                     unstash 'client-src'
                     dir('client') {
-                        // Assuming the build commands are here
+                        // Assuming the build commands are here [ @Chandan verify this]
                         sh 'npm install'
                         sh 'npm run build'
                         // Stash the build artifacts, excluding the node_modules directory
@@ -116,7 +116,7 @@ pipeline {
             agent any
             steps {
                 dir('client') { 
-                                // Execute the lint script and allow the build to fail on lint errors
+                                // Execute the lint script and allow the build not to fail on lint errors
                   script {
                      // Run lint script and capture the exit code
                      def lintExitCode = sh(script: 'npm run lint:ci || true', returnStatus: true)
