@@ -172,19 +172,20 @@ pipeline {
             agent any
             steps {
                 script {
-                    // Wraping the SSH commands in a single SSH session
+                    // Wrapping the SSH commands in a single SSH session
                     sshagent(['jenkinaccess']) {
-                        // SSH command to execute Trivy scan should be on the same line
-                        // and should pass the Trivy scan command as an argument
-                        sh "ssh ab@host.docker.internal 'trivy image --download-db-only && \
-                        echo \"Scanning ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} with Trivy...\" && \
-                        trivy image --format json --output '/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json' ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'"
+                        // Execute Trivy scan and copy the report to Jenkins workspace
+                        sh """
+                        ssh ab@host.docker.internal 'trivy image --download-db-only && \
+                        echo "Scanning ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} with Trivy..." && \
+                        trivy image --format json --output "/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json" ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'
+                
+                        scp ab@host.docker.internal:/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json .
+                        """
 
-                        // Archive artifacts within the same SSH session
+                        // Archive artifacts
                         archiveArtifacts artifacts: 'trivy-report--${env.BUILD_NUMBER}.json', onlyIfSuccessful: true
-
                     }
-                    
                 }
             }
         }
