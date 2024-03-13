@@ -172,11 +172,14 @@ pipeline {
             agent any
             steps {
                 script {
-                    def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
-                    sh "trivy image --download-db-only"
-                    echo "Scanning ${image} with Trivy..."
-                    sh "trivy image --format json --output trivy-report.json ${image}"
-                    archiveArtifacts artifacts: 'trivy-report.json', onlyIfSuccessful: true
+                        sshagent(['jenkinaccess']) {
+                         sh "ssh ab@host.docker.internal"
+                         def image = "${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}"
+                         sh "trivy image --download-db-only"
+                         echo "Scanning ${image} with Trivy..."
+                         sh "trivy image --format json --output trivy-report.json ${image}"
+                         archiveArtifacts artifacts: 'trivy-report.json', onlyIfSuccessful: true
+                        }
                 }
             }
         }
