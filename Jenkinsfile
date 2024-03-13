@@ -181,7 +181,7 @@ pipeline {
                         trivy image --format json --output trivy-report.json ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'"
 
                         // Archive artifacts within the same SSH session
-                        archiveArtifacts artifacts: 'trivy-report.json', onlyIfSuccessful: true
+                        archiveArtifacts artifacts: '**/trivy-report.json', onlyIfSuccessful: true
                     }
                 }
             }
