@@ -178,11 +178,13 @@ pipeline {
                         // and should pass the Trivy scan command as an argument
                         sh "ssh ab@host.docker.internal 'trivy image --download-db-only && \
                         echo \"Scanning ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} with Trivy...\" && \
-                        trivy image --format json --output trivy-report.json ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'"
+                        trivy image --format json --output '/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json' ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'"
 
                         // Archive artifacts within the same SSH session
                         archiveArtifacts artifacts: '**/trivy-report.json', onlyIfSuccessful: true
+
                     }
+                    
                 }
             }
         }
