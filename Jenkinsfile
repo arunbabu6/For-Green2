@@ -177,8 +177,8 @@ pipeline {
                         sh "ssh ab@host.docker.internal 'trivy image --download-db-only && \
                         echo \"Scanning ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} with Trivy...\" && \
                         trivy image --format json --output \"/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json\" ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'"
-                
-                        // Make sure to use double quotes here for string interpolation
+                        scp "ab@host.docker.internal:/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json" .
+                        // double quotes here for string interpolation
                     archiveArtifacts artifacts: "trivy-report--${env.BUILD_NUMBER}.json", onlyIfSuccessful: true
                     }
                 }
