@@ -173,15 +173,15 @@ pipeline {
                 script {
                     // Wrapping the SSH commands in a single SSH session
                     sshagent(['jenkinaccess']) {
-                        sh """
                         // Execute Trivy scan and echo the scanning process
-                        ssh ab@host.docker.internal 'trivy image --download-db-only && \
+                        sh "ssh ab@host.docker.internal 'trivy image --download-db-only && \
                         echo \"Scanning ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} with Trivy...\" && \
-                        trivy image --format json --output "/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json\" ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'
-                        scp ab@host.docker.internal:/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json .
-                        """
-                    // double quotes here for string interpolation
-                    archiveArtifacts artifacts: "trivy-report--${env.BUILD_NUMBER}.json", onlyIfSuccessful: true
+                        trivy image --format json --output \"/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json\" ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'"
+                        // Correctly execute scp within a sh command block
+                        sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json ."
+
+                        // Use double quotes for string interpolation
+                        archiveArtifacts artifacts: "trivy-report--${env.BUILD_NUMBER}.json", onlyIfSuccessful: true
                     }
                 }
             }
