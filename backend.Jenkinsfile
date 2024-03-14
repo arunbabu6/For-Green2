@@ -191,62 +191,72 @@ pipeline {
             }
         }
 
+
+
         stage('Deploy') {      
             agent any  
             steps {
                 script {
                     switch (ENVIRONMENT) {
                         case 'Demo':
+                        withCredentials([string(credentialsId: 'MONGO_URI', variable: 'MONGO_URI_SECRET')]) {
                             sshagent(['jenkinaccess']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ab@host.docker.internal '
                                     docker pull ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER} &&
                                     docker stop projectname-backend-v2 || true &&
                                     docker rm projectname-backend-v2 || true &&
-                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="\\"${MONGO_URI_SECRET}\\"" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
                                     '
-                            """
+                                """
                             }
-                            break
-                            
+                        }
+                        break
+              
                         case 'Testing':
+                        withCredentials([string(credentialsId: 'MONGO_URI', variable: 'MONGO_URI_SECRET')]) {
                             sshagent(['jenkinaccess']) {
                                 sh """
-                                    ssh -o StrictHostKeyChecking=no ab@Testing-host.docker.internal '
-                                    docker pull ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
-                                    docker stop projectname-frontend || true &&
+                                    ssh -o StrictHostKeyChecking=no ab@host.docker.internal '
+                                    docker pull ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER} &&
+                                    docker stop projectname-backend-v2 || true &&
                                     docker rm projectname-backend-v2 || true &&
-                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="\\"${MONGO_URI_SECRET}\\"" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
                                     '
-                            """
+                                """
                             }
-                            break
+                        }
+                        break
                            
-                        case 'Staging':
-                            sshagent(['jenkinaccess']) {
-                                sh """
-                                    ssh -o StrictHostKeyChecking=no ab@Staging-host.docker.internal '
-                                    docker pull ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
-                                    docker stop projectname-frontend || true &&
-                                    docker rm projectname-backend-v2 || true &&
-                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
-                                    '
-                                    """
-                                }
-                            break
-                            
                         case 'Production':
+                        withCredentials([string(credentialsId: 'MONGO_URI', variable: 'MONGO_URI_SECRET')]) {
                             sshagent(['jenkinaccess']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ab@Production-host.docker.internal '
-                                    docker pull ${env.DOCKER_IMAGEE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
-                                    docker stop projectname-frontend || true &&
+                                    docker pull ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER} &&
+                                    docker stop projectname-backend-v2 || true &&
                                     docker rm projectname-backend-v2 || true &&
-                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="\\"${MONGO_URI_SECRET}\\"" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
                                     '
-                            """
+                                """
                             }
-                            break
+                        }
+                        break
+                            
+                        case 'Staging':
+                        withCredentials([string(credentialsId: 'MONGO_URI', variable: 'MONGO_URI_SECRET')]) {
+                            sshagent(['jenkinaccess']) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no ab@Staging-host.docker.internal '
+                                    docker pull ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER} &&
+                                    docker stop projectname-backend-v2 || true &&
+                                    docker rm projectname-backend-v2 || true &&
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="\\"${MONGO_URI_SECRET}\\"" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
+                                    '
+                                """
+                            }
+                        }
+                        break
                             
                         default:
                             echo "Environment configuration not found"
