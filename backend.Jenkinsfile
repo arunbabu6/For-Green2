@@ -191,8 +191,6 @@ pipeline {
             }
         }
 
-
-
         stage('Deploy') {      
             agent any  
             steps {
@@ -206,7 +204,7 @@ pipeline {
                                     docker pull ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER} &&
                                     docker stop projectname-backend-v2 || true &&
                                     docker rm projectname-backend-v2 || true &&
-                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="\\"${MONGO_URI_SECRET}\\"" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
                                     '
                                 """
                             }
@@ -221,7 +219,7 @@ pipeline {
                                     docker pull ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER} &&
                                     docker stop projectname-backend-v2 || true &&
                                     docker rm projectname-backend-v2 || true &&
-                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="\\"${MONGO_URI_SECRET}\\"" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
                                     '
                                 """
                             }
@@ -236,7 +234,7 @@ pipeline {
                                     docker pull ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER} &&
                                     docker stop projectname-backend-v2 || true &&
                                     docker rm projectname-backend-v2 || true &&
-                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="\\"${MONGO_URI_SECRET}\\"" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI=MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
                                     '
                                 """
                             }
@@ -251,7 +249,7 @@ pipeline {
                                     docker pull ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER} &&
                                     docker stop projectname-backend-v2 || true &&
                                     docker rm projectname-backend-v2 || true &&
-                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="\\"${MONGO_URI_SECRET}\\"" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGEE}:${env.ENVIRONMENT.toLowerCase()}-backend-${env.BUILD_NUMBER}
                                     '
                                 """
                             }
@@ -282,5 +280,3 @@ pipeline {
         }
     }
 }
-
-
