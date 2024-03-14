@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGEE = 'projectgreen/backend-v2'
+        DOCKER_IMAGE = 'projectgreen/backend-v2' // Corrected variable name
         SONARQUBE_TOKEN = credentials('sonar-docker')
         DOCKERHUB_CREDENTIALS = credentials('dockerhub1')
         MONGO_URI = credentials('MONGO_URI')
@@ -163,7 +163,7 @@ pipeline {
                         withCredentials([usernamePassword(credentialsId: 'dockerhub1', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                             sh """
                                 echo '${DOCKER_PASSWORD}' | ssh ab@host.docker.internal 'docker login -u ${DOCKER_USERNAME} --password-stdin' > /dev/null 2>&1
-                                ssh ab@host.docker.internal 'docker push ${env.DOCKER_IMAGEE}-backend-v2:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'
+                                ssh ab@host.docker.internal 'docker push ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'
                             """
                         }
 
