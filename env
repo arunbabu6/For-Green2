@@ -1,0 +1,2 @@
+PORT=6969
+MONGO_URI=mongodb+srv://MongoAdmin:Admin123@nausicca.zad4t4b.mongodb.net/?retryWrites=true&w=majority&appName=nausicca
