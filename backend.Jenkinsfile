@@ -78,7 +78,6 @@ pipeline {
                         // Assuming the build commands are here [ @Chandan verify this]
                         sh 'cp ${WORKSPACE}/.env .'
                         sh 'npm install'
-                        sh 'npm run build'
                         // Stash the build artifacts, excluding the node_modules directory
                         stash excludes: 'node_modules/**', includes: '**', name: 'build-artifactsb'
                     }
