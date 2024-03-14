@@ -146,7 +146,7 @@ pipeline {
                     sh "mkdir -p artifactsb"
                     dir('artifactsb') {
                         // Unstash the build artifacts into this 'artifacts' directory
-                        unstash 'build-artifacts'
+                        unstash 'build-artifactsb'
                         }
                         sshagent(['jenkinaccess']) {
                             // Clear the 'artifacts' directory on the Docker host
