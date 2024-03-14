@@ -156,8 +156,7 @@ pipeline {
                             sh "ssh ab@host.docker.internal 'ls -la ${PROJECT_DIR}/artifactsb/'"
 
                             // Build the Docker image on the Docker host
-                            sh "ssh ab@host.docker.internal 'cd ${PROJECT_DIR} && docker build -t ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} .'"
-                            sh "ssh ab@host.docker.internal 'cd ${PROJECT_DIR} && docker build -f backend.Dockerfile -t ${env.DOCKER_IMAGE}-backend-v2:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} .'"
+                            sh "ssh ab@host.docker.internal 'cd ${PROJECT_DIR} && docker build -f backend.Dockerfile -t ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} .'"
 
                         }
                         // Log in to DockerHub and push the image
@@ -180,8 +179,8 @@ pipeline {
                     sshagent(['jenkinaccess']) {
                         // Execute Trivy scan and echo the scanning process
                         sh "ssh ab@host.docker.internal 'trivy image --download-db-only && \
-                        echo \"Scanning ${env.DOCKER_IMAGE}-backend-v2:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} with Trivy...\" && \
-                        trivy image --format json --output \"/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json\" ${env.DOCKER_IMAGE}-backend-v2:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'"
+                        echo \"Scanning ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} with Trivy...\" && \
+                        trivy image --format json --output \"/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json\" ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}'"
                         // Correctly execute scp within a sh command block
                         sh "scp ab@host.docker.internal:/opt/docker-green/Trivy/trivy-report--${env.BUILD_NUMBER}.json ."
 
@@ -201,10 +200,10 @@ pipeline {
                             sshagent(['jenkinaccess']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ab@host.docker.internal '
-                                    docker pull ${env.DOCKER_IMAGE}-backend-v2:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
+                                    docker pull ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-backend-v2 || true &&
                                     docker rm projectname-backend-v2 || true &&
-                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGE}-backend-v2:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
                             }
@@ -214,11 +213,10 @@ pipeline {
                             sshagent(['jenkinaccess']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ab@Testing-host.docker.internal '
-                                    docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
+                                    docker pull ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
-                                    docker rm projectname-frontend || true &&
-                                    docker run -d --name projectname-frontend -p 8090:80 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
-                                    docker run -e MONGO_URI="${env.MONGO_URI}" -p 6969:6969 your_image_name
+                                    docker rm projectname-backend-v2 || true &&
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
                             }
@@ -228,10 +226,10 @@ pipeline {
                             sshagent(['jenkinaccess']) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no ab@Staging-host.docker.internal '
-                                    docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
+                                    docker pull ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
-                                    docker rm projectname-frontend || true &&
-                                    docker run -d --name projectname-frontend -p 8090:80 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    docker rm projectname-backend-v2 || true &&
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                                     """
                                 }
@@ -243,8 +241,8 @@ pipeline {
                                     ssh -o StrictHostKeyChecking=no ab@Production-host.docker.internal '
                                     docker pull ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER} &&
                                     docker stop projectname-frontend || true &&
-                                    docker rm projectname-frontend || true &&
-                                    docker run -d --name projectname-frontend -p 8090:80 ${env.DOCKER_IMAGE}-frontend:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
+                                    docker rm projectname-backend-v2 || true &&
+                                    docker run -d --name projectname-backend-v2 -p 6969:6969 -e MONGO_URI="${MONGO_URI}" ${env.DOCKER_IMAGE}:${env.ENVIRONMENT.toLowerCase()}-${env.BUILD_NUMBER}
                                     '
                             """
                             }
@@ -274,5 +272,3 @@ pipeline {
         }
     }
 }
-
-
