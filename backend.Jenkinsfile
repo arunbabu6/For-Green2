@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'projectgreen/pro-green-v2' // Corrected variable name
+        DOCKER_IMAGE = 'arunthopil/pro-green-v2' // Corrected variable name
         SONARQUBE_TOKEN = credentials('sonar-docker')
         DOCKERHUB_CREDENTIALS = credentials('dockerhub1')
         MONGO_URI = credentials('MONGO_URI')
