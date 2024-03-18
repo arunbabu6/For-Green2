@@ -115,7 +115,7 @@ pipeline {
                       sonar-scanner \
                       -Dsonar.projectKey=Project-Green2-Backend \
                       -Dsonar.sources=. \
-                      -Dsonar.host.url=http://172.19.0.4:9000/ \
+                      -Dsonar.host.url=http://172.19.0.2:9000/ \
                       -Dsonar.login=$SONARQUBE_TOKEN
                     """
                 }
