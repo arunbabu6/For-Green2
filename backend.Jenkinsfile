@@ -90,20 +90,26 @@ pipeline {
             agent any
             steps {
                 script {
-                    sshagent(['jenkinaccess']) {
-                        // Navigate to the project directory and run JSDoc
-                        // Assuming the jsdoc.json configuration specifies the output directory
-                        // Alternatively, use the -d option to explicitly set the destination
-                        sh "ssh ab@host.docker.internal 'cd ${PROJECT_DIR}/backend && npx jsdoc -c jsdoc.json -r . -d ${PROJECT_DIR}/docs/backend'"
+                    // Create a temporary directory in the Jenkins workspace to hold the unstashed files
+                    sh "mkdir -p temp_backend"
+                    // Unstash the backend source code into this temporary directory
+                    dir('temp_backend') {
+                        unstash 'backend-src'
                     }
+                    // Copy the source code specifically to the 'backenddocs' directory on the Docker host
+                    sshagent(['jenkinaccess']) {
+                        sh "scp -rp temp_backend/* ab@host.docker.internal:${PROJECT_DIR}/backenddocs"
+                        // Generate the documentation on the Docker host, specifying the output within the same 'backenddocs' directory or a subdirectory of it for the generated docs
+                        sh "ssh ab@host.docker.internal 'cd ${PROJECT_DIR}/backenddocs && npx jsdoc -c jsdoc.json -r . -d ./docs'"
+                        // Optionally, if you need to archive the generated documentation in Jenkins, copy it back from the Docker host
+                        sh "scp -rp ab@host.docker.internal:${PROJECT_DIR}/backenddocs/docs ./docs-backend"
+                    }
+                    // Archive the documentation if copied back
+                    archiveArtifacts artifacts: 'docs-backend/**', allowEmptyArchive: true
                 }
-            }
         }
-        stage('Archive Documentation') {
-            steps {
-                archiveArtifacts artifacts: '${PROJECT_DIR}/docs/backend/**', allowEmptyArchive: true
-            }
-        }
+    }
+
 
 
         // SonarQube Analysis and Snyk Security Scan 
