@@ -86,6 +86,26 @@ pipeline {
             }
         }
 
+        stage('Generate Documentation') {
+            agent any
+            steps {
+                script {
+                    sshagent(['jenkinaccess']) {
+                        // Navigate to the project directory and run JSDoc
+                        // Assuming the jsdoc.json configuration specifies the output directory
+                        // Alternatively, use the -d option to explicitly set the destination
+                        sh "ssh ab@host.docker.internal 'cd ${PROJECT_DIR}/backend && npx jsdoc -c jsdoc.json -r . -d ${PROJECT_DIR}/docs/backend'"
+                    }
+                }
+            }
+        }
+        stage('Archive Documentation') {
+            steps {
+                archiveArtifacts artifacts: '${PROJECT_DIR}/docs/backend/**', allowEmptyArchive: true
+            }
+        }
+
+
         // SonarQube Analysis and Snyk Security Scan 
         stage('SonarQube Analysis') {
             agent any
@@ -95,7 +115,7 @@ pipeline {
                       sonar-scanner \
                       -Dsonar.projectKey=Project-Green2-Backend \
                       -Dsonar.sources=. \
-                      -Dsonar.host.url=http://172.19.0.4:9000/ \
+                      -Dsonar.host.url=http://172.19.0.2:9000/ \
                       -Dsonar.login=$SONARQUBE_TOKEN
                     """
                 }
@@ -280,3 +300,4 @@ pipeline {
         }
     }
 }
+
