@@ -1,17 +1,17 @@
 {
   "source": {
-    "include": ["src"], // Specify directories or files to include
-    "exclude": ["node_modules"], // Specify directories or files to exclude
-    "includePattern": ".+\\.js(doc|x)?$", // Only include files with .js, .jsdoc, or .jsx extensions
+    "include": ["."], // Indicates the current directory
+    "exclude": ["node_modules"], // Continues to exclude node_modules
+    "includePattern": ".+\\.js(doc|x)?$", // Includes .js, .jsdoc, or .jsx files
     "excludePattern": "(^|\\/|\\\\)_"
   },
   "opts": {
-    "recurse": true, // Recursively search directories for source files
-    "destination": "./docs", // Output directory for generated documentation
-    "template": "default" // Use the default template (you can specify custom templates)
+    "recurse": true,
+    "destination": "./docs",
+    "template": "default"
   },
   "plugins": [
-    "plugins/markdown" // Use the markdown plugin if needed
+    "plugins/markdown"
   ],
   "templates": {
     "cleverLinks": false,
