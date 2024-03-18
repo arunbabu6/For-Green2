@@ -98,6 +98,8 @@ pipeline {
                     }
                     // Copy the source code specifically to the 'backenddocs' directory on the Docker host
                     sshagent(['jenkinaccess']) {
+                        sh "ssh ab@host.docker.internal 'rm -rf ${PROJECT_DIR}/backenddocs/*'"
+                        sh "ssh ab@host.docker.internal 'mkdir ${PROJECT_DIR}/backenddocs/docs'"
                         sh "scp -rp temp_backend/* ab@host.docker.internal:${PROJECT_DIR}/backenddocs"
                         // Generate the documentation on the Docker host, specifying the output within the same 'backenddocs' directory or a subdirectory of it for the generated docs
                         sh "ssh ab@host.docker.internal 'cd ${PROJECT_DIR}/backenddocs && npx jsdoc -c jsdoc.json -r . -d ./docs'"
@@ -306,4 +308,3 @@ pipeline {
         }
     }
 }
-
