@@ -1,1 +1,20 @@
-
+{
+  "source": {
+    "include": ["src"], // Specify directories or files to include
+    "exclude": ["node_modules"], // Specify directories or files to exclude
+    "includePattern": ".+\\.js(doc|x)?$", // Only include files with .js, .jsdoc, or .jsx extensions
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  "opts": {
+    "recurse": true, // Recursively search directories for source files
+    "destination": "./docs", // Output directory for generated documentation
+    "template": "default" // Use the default template (you can specify custom templates)
+  },
+  "plugins": [
+    "plugins/markdown" // Use the markdown plugin if needed
+  ],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false
+  }
+}
